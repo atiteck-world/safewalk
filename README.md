@@ -1,16 +1,101 @@
-# safewalk
 
-A new Flutter project.
+# 🛡️ SafeWalk – Personal Safety App
 
-## Getting Started
+**SafeWalk** is a mobile application built with Flutter to enhance personal safety for students and individuals walking alone. It allows real-time trip tracking, emergency alerts, and shake-triggered SOS notifications to pre-saved contacts.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 📱 Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+| Feature                         | Description                                                                 |
+|---------------------------------|-----------------------------------------------------------------------------|
+| 🚶‍♂️ **Trip Tracking**            | Start and end trip sessions using GPS location tracking                   |
+| 🆘 **Emergency Button**         | Instantly notify emergency contacts with your live location               |
+| 📳 **Shake-to-Send Alert**      | Send a quick SOS alert by simply shaking your device                      |
+| 📍 **Live Location Sharing**    | Share your current location with selected contacts in real time (planned) |
+| 📔 **Trip History**             | View records of previous trips (planned)                                   |
+| ⚙️ **Settings & Sensitivity**   | Manage preferences including shake sensitivity and alert toggles          |
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🧰 Tech Stack
+
+- **Flutter** – Cross-platform UI framework
+- **Google Maps Flutter** – Embedded map for live tracking
+- **Geolocator** – GPS positioning
+- **Sensors Plus** – Accelerometer access for shake detection
+- **Firebase (Planned)** – For storing trip logs and user data
+- **Shared Preferences** – Local state and settings storage
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Flutter SDK
+- Android Studio (for emulator) or physical device
+- VS Code (or preferred IDE)
+- Google Maps API Key (for map functionality)
+
+### Clone and Run
+
+```bash
+git clone https://github.com/atiteck-world/safewalk.git
+cd safewalk
+flutter pub get
+flutter run
+```
+
+> 🔐 **Don't forget** to add your `google-services.json` and API keys where required.
+
+---
+
+## 📂 Project Structure
+
+```
+/lib
+ ┣ /screens                # UI screens
+ ┃ ┣ home_screen.dart
+ ┃ ┣ trip_tracker_screen.dart
+ ┃ ┣ emergency_contacts_screen.dart
+ ┃ ┗ settings_screen.dart
+ ┣ /services               # Location, alerts, Firebase (planned)
+ ┣ /models                 # Data models
+ ┣ main.dart               # Entry point
+```
+
+---
+
+## 📸 Screenshots (Coming Soon)
+
+_Add screenshots or screen recordings of your app here._
+
+---
+
+## 🔒 Permissions
+
+SafeWalk requests the following permissions:
+
+- 📍 **Location Access** (Foreground)
+- 📳 **Sensor Access** (Accelerometer)
+- 📤 **Internet Access** (for live location sharing, Firebase integration)
+
+---
+
+## 👨‍💻 Author
+
+**Bismark Azumah Atiim**  
+📍 Germany | 🌍 Ghana  
+💼 [LinkedIn](https://linkedin.com/in/ba_atiim) | 💻 [GitHub](https://github.com/atiteck-world)
+
+---
+
+## 🏗️ Roadmap
+
+- [x] Home UI
+- [] Trip Tracker screen with GPS
+- [ ] Emergency Contacts manager
+- [ ] Shake-to-send alert
+- [ ] Trip history
+- [ ] Firebase integration for user data
