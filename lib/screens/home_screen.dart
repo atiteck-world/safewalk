@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import '../services/emergency_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final EmergencyService emergencyService = EmergencyService();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -93,7 +96,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Emergency button with enhanced styling
+                // Emergency button with actual functionality
                 Container(
                   width: double.infinity,
                   height: 60,
@@ -108,21 +111,8 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Row(
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.white),
-                              SizedBox(width: 10),
-                              Text('Emergency Alert Sent!'),
-                            ],
-                          ),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    onPressed: () =>
+                        _showEmergencyDialog(context, emergencyService),
                     icon: const Icon(
                       Icons.warning,
                       color: Colors.white,
@@ -149,6 +139,112 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEmergencyDialog(
+    BuildContext context,
+    EmergencyService emergencyService,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent accidental dismissal
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red.shade600,
+              size: 30,
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Emergency Alert',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Container(
+          constraints: const BoxConstraints(maxWidth: 300),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'This will immediately send your current location to ALL emergency contacts.',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.red.shade600,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Use only in real emergencies',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Send emergency alert with location
+              emergencyService.sendEmergencyAlert(
+                context: context,
+                customMessage: 'EMERGENCY ALERT! I need immediate help!',
+              );
+            },
+            icon: const Icon(Icons.send, size: 18),
+            label: const Text(
+              'Send Alert',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -19,4 +19,8 @@ class Contact extends HiveObject {
   Map<String, dynamic> toMap() {
     return {'name': name, 'phone': phone};
   }
+
+  String get cleanPhoneNumber {
+    return phone.replaceAll(RegExp(r'[^\d+]'), '');
+  }
 }
