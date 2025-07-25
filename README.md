@@ -94,7 +94,7 @@ SafeWalk requests the following permissions:
 ## 🏗️ Roadmap
 
 - [x] Home UI
-- [] Trip Tracker screen with GPS
+- [ ] Trip Tracker screen with GPS
 - [ ] Emergency Contacts manager
 - [ ] Shake-to-send alert
 - [ ] Trip history
