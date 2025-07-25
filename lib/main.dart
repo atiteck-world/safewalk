@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:safewalk/models/contact.dart';
+import 'package:safewalk/screens/emergency_contacts_screen.dart';
 import 'package:safewalk/screens/home_screen.dart';
 import 'package:safewalk/screens/trip_tracker_screen.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive and register the Contact adapter
+  await Hive.initFlutter();
+
+  // Register the Contact adapter
+  Hive.registerAdapter(ContactAdapter());
+
+  // Open the box for storing contacts
+  await Hive.openBox<Contact>('emergencyContacts');
   runApp(SafeWalkApp());
 }
 
@@ -22,6 +35,7 @@ class SafeWalkApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomeScreen(),
         '/trip': (context) => const TripTrackerScreen(),
+        '/contacts': (context) => const EmergencyContactsScreen(),
       },
     );
   }
