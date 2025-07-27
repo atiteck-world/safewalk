@@ -38,9 +38,7 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
       });
 
       // Move camera to current location
-      mapController?.animateCamera(
-        CameraUpdate.newLatLng(_currentPosition!),
-      );
+      mapController?.animateCamera(CameraUpdate.newLatLng(_currentPosition!));
     } catch (e) {
       print('Location error: $e');
       _showErrorSnackBar('Error getting location: $e');
@@ -99,31 +97,32 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
     _routePoints.add(_currentPosition!);
 
     // Start location tracking using Geolocator directly since LocationServices doesn't have getLocationStream
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // Update every 10 meters
-      ),
-    ).listen(
-      (Position position) {
-        setState(() {
-          _currentPosition = LatLng(position.latitude, position.longitude);
-          _updateMarkers();
-          _routePoints.add(_currentPosition!);
-          _updateRoute();
-        });
+    _positionStream =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10, // Update every 10 meters
+          ),
+        ).listen(
+          (Position position) {
+            setState(() {
+              _currentPosition = LatLng(position.latitude, position.longitude);
+              _updateMarkers();
+              _routePoints.add(_currentPosition!);
+              _updateRoute();
+            });
 
-        // Move camera to current location
-        mapController?.animateCamera(
-          CameraUpdate.newLatLng(_currentPosition!),
+            // Move camera to current location
+            mapController?.animateCamera(
+              CameraUpdate.newLatLng(_currentPosition!),
+            );
+          },
+          onError: (error) {
+            print('Location stream error: $error');
+            _showErrorSnackBar('Location tracking error: $error');
+            _stopTrip();
+          },
         );
-      },
-      onError: (error) {
-        print('Location stream error: $error');
-        _showErrorSnackBar('Location tracking error: $error');
-        _stopTrip();
-      },
-    );
 
     setState(() {
       isTracking = true;
@@ -131,7 +130,6 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
 
     _showSuccessSnackBar("Trip Started - Tracking your route");
   }
-
 
   void _stopTrip() {
     _positionStream?.cancel();
@@ -156,6 +154,7 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
         ),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -172,6 +171,7 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
         ),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -184,6 +184,8 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -195,20 +197,36 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
         elevation: 4,
       ),
       body: _currentPosition == null
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Getting your location...'),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isDarkMode ? Colors.white : Colors.red.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Getting your location...',
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                    ),
+                  ),
                 ],
               ),
             )
           : Stack(
               children: [
                 GoogleMap(
-                  onMapCreated: (controller) => mapController = controller,
+                  onMapCreated: (controller) {
+                    mapController = controller;
+                    // Apply dark mode style to map if needed
+                    if (isDarkMode) {
+                      _setMapStyle(controller);
+                    }
+                  },
                   initialCameraPosition: CameraPosition(
                     target: _currentPosition!,
                     zoom: 16,
@@ -221,7 +239,7 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
                   mapToolbarEnabled: false,
                 ),
 
-                // Status indicator
+                // Status indicator with dark mode support
                 Positioned(
                   top: 16,
                   left: 16,
@@ -229,57 +247,301 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+                      color: isDarkMode
+                          ? const Color(0xFF2C2C2C).withOpacity(0.95)
+                          : Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
+                          color: Colors.black.withOpacity(
+                            isDarkMode ? 0.4 : 0.1,
+                          ),
+                          blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ],
+                      border: isDarkMode
+                          ? Border.all(color: Colors.grey.shade700, width: 1)
+                          : null,
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          isTracking
-                              ? Icons.radio_button_checked
-                              : Icons.radio_button_unchecked,
-                          color: isTracking ? Colors.green : Colors.grey,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isTracking ? 'Tracking Active' : 'Tracking Inactive',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: isTracking ? Colors.green : Colors.grey,
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: isTracking
+                                ? Colors.green.shade100
+                                : (isDarkMode
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade200),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            isTracking
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: isTracking
+                                ? Colors.green.shade600
+                                : (isDarkMode
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600),
+                            size: 20,
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isTracking
+                                  ? 'Tracking Active'
+                                  : 'Tracking Inactive',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: isTracking
+                                    ? Colors.green.shade600
+                                    : (isDarkMode
+                                          ? Colors.grey.shade300
+                                          : Colors.grey.shade700),
+                              ),
+                            ),
+                            if (_routePoints.isNotEmpty)
+                              Text(
+                                '${_routePoints.length} tracking points',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDarkMode
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                          ],
+                        ),
                         const Spacer(),
-                        if (_routePoints.isNotEmpty)
-                          Text(
-                            '${_routePoints.length} points',
-                            style: const TextStyle(color: Colors.grey),
+                        if (isTracking)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade600,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              'LIVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                       ],
                     ),
                   ),
                 ),
+
+                // Route info card (if tracking)
+                if (isTracking && _routePoints.length > 1)
+                  Positioned(
+                    bottom: 100,
+                    left: 16,
+                    right: 16,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? const Color(0xFF2C2C2C).withOpacity(0.95)
+                            : Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(
+                              isDarkMode ? 0.4 : 0.1,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                        border: isDarkMode
+                            ? Border.all(color: Colors.grey.shade700, width: 1)
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildRouteInfo(
+                            'Distance',
+                            '${(_calculateDistance() / 1000).toStringAsFixed(2)} km',
+                            Icons.straighten,
+                            isDarkMode,
+                          ),
+                          Container(
+                            height: 40,
+                            width: 1,
+                            color: isDarkMode
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade300,
+                          ),
+                          _buildRouteInfo(
+                            'Points',
+                            '${_routePoints.length}',
+                            Icons.location_on,
+                            isDarkMode,
+                          ),
+                          Container(
+                            height: 40,
+                            width: 1,
+                            color: isDarkMode
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade300,
+                          ),
+                          _buildRouteInfo(
+                            'Status',
+                            'Active',
+                            Icons.circle,
+                            isDarkMode,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
       floatingActionButton: _currentPosition == null
           ? null
-          : FloatingActionButton.extended(
-              onPressed: _toggleTrip,
-              label: Text(
-                isTracking ? 'End Trip' : 'Start Trip',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+          : Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: (isTracking ? Colors.red : Colors.green).withOpacity(
+                      0.3,
+                    ),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              icon: Icon(isTracking ? Icons.stop : Icons.play_arrow),
-              backgroundColor: isTracking ? Colors.red : Colors.green,
-              elevation: 4,
+              child: FloatingActionButton.extended(
+                onPressed: _toggleTrip,
+                label: Text(
+                  isTracking ? 'End Trip' : 'Start Trip',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                icon: Icon(
+                  isTracking ? Icons.stop : Icons.play_arrow,
+                  size: 24,
+                ),
+                backgroundColor: isTracking
+                    ? Colors.red.shade600
+                    : Colors.green.shade600,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  Widget _buildRouteInfo(
+    String label,
+    String value,
+    IconData icon,
+    bool isDarkMode,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: isDarkMode ? Colors.blue.shade300 : Colors.blue.shade600,
+          size: 20,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _calculateDistance() {
+    if (_routePoints.length < 2) return 0.0;
+
+    double totalDistance = 0.0;
+    for (int i = 0; i < _routePoints.length - 1; i++) {
+      totalDistance += Geolocator.distanceBetween(
+        _routePoints[i].latitude,
+        _routePoints[i].longitude,
+        _routePoints[i + 1].latitude,
+        _routePoints[i + 1].longitude,
+      );
+    }
+    return totalDistance;
+  }
+
+  void _setMapStyle(GoogleMapController controller) {
+    // Dark map style JSON
+    const String darkMapStyle = '''
+    [
+      {
+        "elementType": "geometry",
+        "stylers": [{"color": "#212121"}]
+      },
+      {
+        "elementType": "labels.icon",
+        "stylers": [{"visibility": "off"}]
+      },
+      {
+        "elementType": "labels.text.fill",
+        "stylers": [{"color": "#757575"}]
+      },
+      {
+        "elementType": "labels.text.stroke",
+        "stylers": [{"color": "#212121"}]
+      },
+      {
+        "featureType": "administrative",
+        "elementType": "geometry",
+        "stylers": [{"color": "#757575"}]
+      },
+      {
+        "featureType": "road",
+        "elementType": "geometry.fill",
+        "stylers": [{"color": "#2c2c2c"}]
+      },
+      {
+        "featureType": "road",
+        "elementType": "labels.text.fill",
+        "stylers": [{"color": "#8a8a8a"}]
+      },
+      {
+        "featureType": "water",
+        "elementType": "geometry",
+        "stylers": [{"color": "#000000"}]
+      }
+    ]
+    ''';
+
+    controller.setMapStyle(darkMapStyle);
   }
 }

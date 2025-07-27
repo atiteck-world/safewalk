@@ -9,23 +9,25 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final EmergencyService emergencyService = EmergencyService();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'SafeWalk',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.indigo,
         elevation: 4,
         centerTitle: true,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.indigo, Colors.blue],
+            colors: isDarkMode
+                ? [const Color(0xFF1F1F1F), const Color(0xFF121212)]
+                : [Colors.indigo, Colors.blue],
           ),
         ),
         child: SafeArea(
@@ -38,32 +40,43 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: isDarkMode
+                        ? const Color(0xFF2C2C2C).withOpacity(0.9)
+                        : Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
                     ],
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
-                      Icon(Icons.shield, size: 50, color: Colors.indigo),
-                      SizedBox(height: 10),
+                      Icon(
+                        Icons.shield,
+                        size: 50,
+                        color: isDarkMode ? Colors.white : Colors.indigo,
+                      ),
+                      const SizedBox(height: 10),
                       Text(
                         'Welcome to SafeWalk!',
                         style: TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          color: Colors.indigo,
+                          color: isDarkMode ? Colors.white : Colors.indigo,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         'Your safety companion',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDarkMode
+                              ? Colors.grey.shade300
+                              : Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -149,6 +162,8 @@ class HomeScreen extends StatelessWidget {
     BuildContext context,
     EmergencyService emergencyService,
   ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     // Get current settings
     final settingsBox = Hive.box<AppSettings>('appSettings');
     AppSettings? settings;
@@ -159,8 +174,9 @@ class HomeScreen extends StatelessWidget {
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent accidental dismissal
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
@@ -170,10 +186,14 @@ class HomeScreen extends StatelessWidget {
               size: 30,
             ),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Emergency Alert',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
             ),
           ],
@@ -186,7 +206,10 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(
                 'This will send ${settings?.locationSharingEnabled == true ? "your location and emergency message" : "your emergency message"} to ALL emergency contacts.',
-                style: const TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white70 : Colors.black,
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -194,9 +217,15 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: isDarkMode
+                      ? Colors.blue.shade900.withOpacity(0.3)
+                      : Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? Colors.blue.shade700
+                        : Colors.blue.shade200,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,7 +234,9 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.settings,
-                          color: Colors.blue.shade600,
+                          color: isDarkMode
+                              ? Colors.blue.shade300
+                              : Colors.blue.shade600,
                           size: 16,
                         ),
                         const SizedBox(width: 6),
@@ -214,7 +245,9 @@ class HomeScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700,
+                            color: isDarkMode
+                                ? Colors.blue.shade300
+                                : Colors.blue.shade700,
                           ),
                         ),
                       ],
@@ -222,11 +255,17 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '• Message: "${settings?.customMessage ?? "Default message"}"',
-                      style: const TextStyle(fontSize: 11),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                     Text(
                       '• Location: ${settings?.locationSharingEnabled == true ? "Enabled" : "Disabled"}',
-                      style: const TextStyle(fontSize: 11),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
                     ),
                   ],
                 ),
@@ -236,9 +275,15 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: isDarkMode
+                      ? Colors.red.shade900.withOpacity(0.3)
+                      : Colors.red.shade50,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? Colors.red.shade700
+                        : Colors.red.shade200,
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -248,12 +293,13 @@ class HomeScreen extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Use only in real emergencies',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
+                          color: isDarkMode ? Colors.white70 : Colors.black87,
                         ),
                       ),
                     ),
@@ -269,7 +315,7 @@ class HomeScreen extends StatelessWidget {
             child: Text(
               'Cancel',
               style: TextStyle(
-                color: Colors.grey.shade600,
+                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),

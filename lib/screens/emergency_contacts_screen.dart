@@ -98,14 +98,16 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   }
 
   void _showAddContactSheet() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
           ),
@@ -126,7 +128,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: isDarkMode
+                      ? Colors.grey.shade600
+                      : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -134,12 +138,12 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             const SizedBox(height: 20),
 
             // Title
-            const Text(
+            Text(
               'Add Emergency Contact',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: isDarkMode ? Colors.white : Colors.black87,
               ),
             ),
             const SizedBox(height: 24),
@@ -147,19 +151,42 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             // Name Field
             TextField(
               controller: _nameController,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Full Name',
+                labelStyle: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade300
+                      : Colors.grey.shade600,
+                ),
                 prefixIcon: Icon(
                   Icons.person_outline,
                   color: Colors.red.shade400,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.red.shade400, width: 2),
                 ),
+                filled: true,
+                fillColor: isDarkMode
+                    ? const Color(0xFF3C3C3C)
+                    : Colors.grey.shade50,
               ),
             ),
             const SizedBox(height: 16),
@@ -167,19 +194,42 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             // Phone Field
             TextField(
               controller: _phoneController,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Phone Number',
+                labelStyle: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade300
+                      : Colors.grey.shade600,
+                ),
                 prefixIcon: Icon(
                   Icons.phone_outlined,
                   color: Colors.red.shade400,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.red.shade400, width: 2),
                 ),
+                filled: true,
+                fillColor: isDarkMode
+                    ? const Color(0xFF3C3C3C)
+                    : Colors.grey.shade50,
               ),
               keyboardType: TextInputType.phone,
             ),
@@ -212,29 +262,37 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   }
 
   Future<void> _removeContact(int index) async {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final contacts = contactsBox.values.toList();
     final Contact contact = contacts[index];
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Remove Contact'),
-        content: Text('Are you sure you want to remove ${contact.name}?'),
+        title: Text(
+          'Remove Contact',
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+        ),
+        content: Text(
+          'Are you sure you want to remove ${contact.name}?',
+          style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(
+                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
             ),
           ),
           TextButton(
             onPressed: () async {
               try {
-                // Delete from Hive box using the contact's key
                 await contact.delete();
-
                 Navigator.of(context).pop();
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -285,6 +343,8 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   }
 
   void _showEditContactSheet(Contact contact) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     // Pre-fill the text controllers with existing contact data
     _nameController.text = contact.name;
     _phoneController.text = contact.phone;
@@ -294,9 +354,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
           ),
@@ -317,7 +377,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: isDarkMode
+                      ? Colors.grey.shade600
+                      : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -325,12 +387,12 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             const SizedBox(height: 20),
 
             // Title
-            const Text(
+            Text(
               'Edit Emergency Contact',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: isDarkMode ? Colors.white : Colors.black87,
               ),
             ),
             const SizedBox(height: 24),
@@ -338,8 +400,14 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             // Name Field
             TextField(
               controller: _nameController,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Full Name',
+                labelStyle: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade300
+                      : Colors.grey.shade600,
+                ),
                 prefixIcon: Icon(
                   Icons.person_outline,
                   color: Colors.red.shade400,
@@ -347,10 +415,22 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
+                  ),
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.red.shade400, width: 2),
                 ),
+                filled: true,
+                fillColor: isDarkMode
+                    ? const Color(0xFF3C3C3C)
+                    : Colors.grey.shade50,
               ),
             ),
             const SizedBox(height: 16),
@@ -358,8 +438,14 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             // Phone Field
             TextField(
               controller: _phoneController,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
               decoration: InputDecoration(
                 labelText: 'Phone Number',
+                labelStyle: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade300
+                      : Colors.grey.shade600,
+                ),
                 prefixIcon: Icon(
                   Icons.phone_outlined,
                   color: Colors.red.shade400,
@@ -367,10 +453,22 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
+                  ),
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.red.shade400, width: 2),
                 ),
+                filled: true,
+                fillColor: isDarkMode
+                    ? const Color(0xFF3C3C3C)
+                    : Colors.grey.shade50,
               ),
               keyboardType: TextInputType.phone,
             ),
@@ -478,13 +576,15 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   }
 
   void _showContactOptions(Contact contact, int index) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
           ),
@@ -498,7 +598,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -506,11 +606,18 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
 
             Text(
               contact.name,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
             ),
             Text(
               contact.phone,
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              style: TextStyle(
+                fontSize: 16,
+                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
             ),
             const SizedBox(height: 30),
 
@@ -520,8 +627,20 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 backgroundColor: Colors.orange.shade100,
                 child: Icon(Icons.location_on, color: Colors.orange.shade600),
               ),
-              title: const Text('Send Location'),
-              subtitle: const Text('Share your current location'),
+              title: Text(
+                'Send Location',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+              subtitle: Text(
+                'Share your current location',
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _emergencyService.sendLocationToContact(context, contact);
@@ -534,8 +653,20 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 backgroundColor: Colors.blue.shade100,
                 child: Icon(Icons.edit, color: Colors.blue.shade600),
               ),
-              title: const Text('Edit Contact'),
-              subtitle: const Text('Modify contact information'),
+              title: Text(
+                'Edit Contact',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+              subtitle: Text(
+                'Modify contact information',
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _showEditContactSheet(contact);
@@ -548,8 +679,20 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                 backgroundColor: Colors.red.shade100,
                 child: Icon(Icons.delete, color: Colors.red.shade600),
               ),
-              title: const Text('Delete Contact'),
-              subtitle: const Text('Remove from emergency contacts'),
+              title: Text(
+                'Delete Contact',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+              subtitle: Text(
+                'Remove from emergency contacts',
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _removeContact(index);
@@ -563,8 +706,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
           'Emergency Contacts',
@@ -592,7 +736,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                   Icon(
                     Icons.contacts_outlined,
                     size: 80,
-                    color: Colors.grey.shade400,
+                    color: isDarkMode
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade400,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -600,13 +746,20 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
+                      color: isDarkMode
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Add trusted contacts for emergencies',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDarkMode
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade500,
+                    ),
                   ),
                 ],
               ),
@@ -620,11 +773,11 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDarkMode ? const Color(0xFF2C2C2C) : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -643,10 +796,10 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                   ),
                   title: Text(
                     contact.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: isDarkMode ? Colors.white : Colors.black87,
                     ),
                   ),
                   subtitle: Padding(
@@ -655,14 +808,18 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                       contact.phone,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey.shade600,
+                        color: isDarkMode
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ),
                   trailing: IconButton(
                     icon: Icon(
                       Icons.more_vert,
-                      color: Colors.grey.shade600,
+                      color: isDarkMode
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                       size: 24,
                     ),
                     onPressed: () => _showContactOptions(contact, index),
