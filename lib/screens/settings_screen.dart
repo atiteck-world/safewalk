@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/settings.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -8,16 +10,24 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late Box<AppSettings> settingsBox;
   final TextEditingController _messageController = TextEditingController();
-  bool shakeEnabled = true;
-  bool locationSharingEnabled = true;
-  bool notificationsEnabled = true;
-  bool darkMode = false;
 
   @override
   void initState() {
     super.initState();
-    _messageController.text = 'EMERGENCY ALERT! I need help immediately!';
+    settingsBox = Hive.box<AppSettings>('appSettings');
+    _loadSettings();
+  }
+
+  void _loadSettings() {
+    // Get existing settings or create default
+    if (settingsBox.isEmpty) {
+      final defaultSettings = AppSettings();
+      settingsBox.add(defaultSettings);
+    }
+    final settings = settingsBox.getAt(0)!;
+    _messageController.text = settings.customMessage;
   }
 
   @override
@@ -33,101 +43,106 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.red.shade600,
+        backgroundColor: Colors.indigo.shade600,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionHeader('Emergency Settings'),
-            const SizedBox(height: 16),
+      body: ValueListenableBuilder(
+        valueListenable: settingsBox.listenable(),
+        builder: (context, Box<AppSettings> box, _) {
+          if (box.isEmpty) return const SizedBox();
 
-            _buildSettingsCard([
-              _buildMessageSection(),
-              const Divider(height: 1),
-              _buildSwitchTile(
-                title: 'Shake to Alert',
-                subtitle: 'Shake phone to send emergency alert',
-                icon: Icons.vibration,
-                value: shakeEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    shakeEnabled = value;
-                  });
-                },
-              ),
-              const Divider(height: 1),
-              _buildSwitchTile(
-                title: 'Location Sharing',
-                subtitle: 'Include location in emergency messages',
-                icon: Icons.location_on,
-                value: locationSharingEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    locationSharingEnabled = value;
-                  });
-                },
-              ),
-            ]),
+          final settings = box.getAt(0)!;
 
-            const SizedBox(height: 24),
-            _buildSectionHeader('App Settings'),
-            const SizedBox(height: 16),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionHeader('Emergency Settings'),
+                const SizedBox(height: 16),
 
-            _buildSettingsCard([
-              _buildSwitchTile(
-                title: 'Push Notifications',
-                subtitle: 'Receive app notifications',
-                icon: Icons.notifications,
-                value: notificationsEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    notificationsEnabled = value;
-                  });
-                },
-              ),
-              const Divider(height: 1),
-              _buildSwitchTile(
-                title: 'Dark Mode',
-                subtitle: 'Use dark theme',
-                icon: Icons.dark_mode,
-                value: darkMode,
-                onChanged: (value) {
-                  setState(() {
-                    darkMode = value;
-                  });
-                },
-              ),
-            ]),
+                _buildSettingsCard([
+                  _buildMessageSection(settings),
+                  const Divider(height: 1),
+                  _buildSwitchTile(
+                    title: 'Shake to Alert',
+                    subtitle: 'Shake phone to send emergency alert',
+                    icon: Icons.vibration,
+                    value: settings.shakeEnabled,
+                    onChanged: (value) {
+                      settings.shakeEnabled = value;
+                      settings.save();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  _buildSwitchTile(
+                    title: 'Location Sharing',
+                    subtitle: 'Include location in emergency messages',
+                    icon: Icons.location_on,
+                    value: settings.locationSharingEnabled,
+                    onChanged: (value) {
+                      settings.locationSharingEnabled = value;
+                      settings.save();
+                    },
+                  ),
+                ]),
 
-            const SizedBox(height: 24),
-            _buildSectionHeader('App Information'),
-            const SizedBox(height: 16),
+                const SizedBox(height: 24),
+                _buildSectionHeader('App Settings'),
+                const SizedBox(height: 16),
 
-            _buildSettingsCard([
-              _buildInfoTile(
-                title: 'Version',
-                subtitle: '1.0.0',
-                icon: Icons.info_outline,
-              ),
-              const Divider(height: 1),
-              _buildInfoTile(
-                title: 'Emergency Contacts',
-                subtitle: 'Manage your emergency contacts',
-                icon: Icons.contact_emergency,
-                onTap: () {
-                  Navigator.pushNamed(context, '/contacts');
-                },
-              ),
-            ]),
+                _buildSettingsCard([
+                  _buildSwitchTile(
+                    title: 'Push Notifications',
+                    subtitle: 'Receive app notifications',
+                    icon: Icons.notifications,
+                    value: settings.notificationsEnabled,
+                    onChanged: (value) {
+                      settings.notificationsEnabled = value;
+                      settings.save();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  _buildSwitchTile(
+                    title: 'Dark Mode',
+                    subtitle: 'Use dark theme',
+                    icon: Icons.dark_mode,
+                    value: settings.darkMode,
+                    onChanged: (value) {
+                      settings.darkMode = value;
+                      settings.save();
+                    },
+                  ),
+                ]),
 
-            const SizedBox(height: 40),
-          ],
-        ),
+                const SizedBox(height: 24),
+                _buildSectionHeader('App Information'),
+                const SizedBox(height: 16),
+
+                _buildSettingsCard([
+                  _buildInfoTile(
+                    title: 'Version',
+                    subtitle: '1.0.0',
+                    icon: Icons.info_outline,
+                  ),
+                  const Divider(height: 1),
+                  _buildInfoTile(
+                    title: 'Emergency Contacts',
+                    subtitle: 'Manage your emergency contacts',
+                    icon: Icons.contact_emergency,
+                    onTap: () {
+                      Navigator.pushNamed(context, '/contacts');
+                    },
+                  ),
+                ]),
+
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -160,7 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildMessageSection() {
+  Widget _buildMessageSection(AppSettings settings) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -207,6 +222,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               contentPadding: const EdgeInsets.all(12),
             ),
+            onChanged: (value) {
+              settings.customMessage = value;
+              settings.save();
+            },
           ),
           const SizedBox(height: 8),
           Text(

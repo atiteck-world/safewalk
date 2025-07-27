@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:safewalk/models/contact.dart';
-//import 'package:safewalk/models/settings.dart';
+import 'package:safewalk/models/settings.dart';
 import 'package:safewalk/screens/emergency_contacts_screen.dart';
 import 'package:safewalk/screens/home_screen.dart';
 import 'package:safewalk/screens/settings_screen.dart';
@@ -12,14 +12,19 @@ void main() async {
 
   // Initialize Hive and register the Contact adapter
   await Hive.initFlutter();
+  print('Hive initialized');
 
   // Register adapters
   Hive.registerAdapter(ContactAdapter());
-  //Hive.registerAdapter(AppSettingsAdapter());
+  print('Contact adapter registered');
+  Hive.registerAdapter(AppSettingsAdapter());
+  print('AppSettings adapter registered');
 
   // Open the box for storing contacts
   await Hive.openBox<Contact>('emergencyContacts');
-  //await Hive.openBox<AppSettings>('appSettings');
+  print('Emergency contacts box opened');
+  await Hive.openBox<AppSettings>('appSettings');
+  print('AppSettings box opened');
 
   runApp(SafeWalkApp());
 }

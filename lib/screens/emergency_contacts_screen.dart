@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/contact.dart';
+import '../services/emergency_service.dart';
 
 class EmergencyContactsScreen extends StatefulWidget {
   const EmergencyContactsScreen({super.key});
@@ -14,6 +15,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   late Box<Contact> contactsBox;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final EmergencyService _emergencyService = EmergencyService();
 
   @override
   void initState() {
@@ -511,6 +513,20 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 30),
+
+            // Send Location Option
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.orange.shade100,
+                child: Icon(Icons.location_on, color: Colors.orange.shade600),
+              ),
+              title: const Text('Send Location'),
+              subtitle: const Text('Share your current location'),
+              onTap: () {
+                Navigator.pop(context);
+                _emergencyService.sendLocationToContact(context, contact);
+              },
+            ),
 
             // Edit Option
             ListTile(

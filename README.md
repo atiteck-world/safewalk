@@ -99,7 +99,7 @@ SafeWalk requests the following permissions:
 - [x] Hive integration for contacts
 - [x] Send emergency message to saved contacts via SMS
 - [x] Settings screen
-- [ ] Hive integration for settings
+- [x] Hive integration for settings
 - [ ] Shake-to-send alert
 - [ ] Trip history
 

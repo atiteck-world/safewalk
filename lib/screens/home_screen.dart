@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../services/emergency_service.dart';
+import '../models/settings.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -147,6 +149,14 @@ class HomeScreen extends StatelessWidget {
     BuildContext context,
     EmergencyService emergencyService,
   ) {
+    // Get current settings
+    final settingsBox = Hive.box<AppSettings>('appSettings');
+    AppSettings? settings;
+
+    if (settingsBox.isNotEmpty) {
+      settings = settingsBox.getAt(0);
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent accidental dismissal
@@ -174,10 +184,54 @@ class HomeScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'This will immediately send your current location to ALL emergency contacts.',
-                style: TextStyle(fontSize: 16),
+              Text(
+                'This will send ${settings?.locationSharingEnabled == true ? "your location and emergency message" : "your emergency message"} to ALL emergency contacts.',
+                style: const TextStyle(fontSize: 16),
               ),
+              const SizedBox(height: 16),
+
+              // Settings info
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.settings,
+                          color: Colors.blue.shade600,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Current Settings:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '• Message: "${settings?.customMessage ?? "Default message"}"',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    Text(
+                      '• Location: ${settings?.locationSharingEnabled == true ? "Enabled" : "Disabled"}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -224,11 +278,7 @@ class HomeScreen extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.of(context).pop();
-              // Send emergency alert with location
-              emergencyService.sendEmergencyAlert(
-                context: context,
-                customMessage: 'EMERGENCY ALERT! I need immediate help!',
-              );
+              emergencyService.sendEmergencyAlert(context: context);
             },
             icon: const Icon(Icons.send, size: 18),
             label: const Text(
