@@ -94,8 +94,13 @@ SafeWalk requests the following permissions:
 ## 🏗️ Roadmap
 
 - [x] Home UI
-- [ ] Trip Tracker screen with GPS
-- [ ] Emergency Contacts manager
+- [x] Trip Tracker screen with GPS
+- [x] Emergency Contacts screen
+- [x] Hive integration for contacts
+- [x] Send emergency message to saved contacts via SMS
+- [x] Settings screen
+- [ ] Hive integration for settings
 - [ ] Shake-to-send alert
 - [ ] Trip history
-- [ ] Firebase integration for user data
+
+

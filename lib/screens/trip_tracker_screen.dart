@@ -190,7 +190,7 @@ class _TripTrackerScreenState extends State<TripTrackerScreen> {
           'Trip Tracker',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.red.shade600,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 4,
       ),
